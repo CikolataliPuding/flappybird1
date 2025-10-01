@@ -1,0 +1,163 @@
+@page "/game"
+
+<canvas id="gameCanvas" width="480" height="800"></canvas>
+
+@code {
+  private const float VirtualWidth = 480f;
+  private const float VirtualHeight = 800f;
+  private const float Gravity = 1400f;
+  private const float JumpVelocity = -420f;
+  private const float PipeSpeed = 180f;
+  private const float PipeSpacing = 220f;
+  private const float PipeGap = 170f;
+  private const float PlayerRadius = 12f;
+
+  private GameState state = GameState.Ready;
+  private float playerX = 120f;
+  private float playerY = VirtualHeight/2f;
+  private float playerVY = 0f;
+  private readonly List<Pipe> pipes = new();
+  private int score = 0;
+  private int maxScore = 0;
+
+  [Inject] IJSRuntime JS { get; set; } = default!;
+  private DotNetObjectReference<Game>? _selfRef;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (!firstRender) return;
+    _selfRef = DotNetObjectReference.Create(this);
+    await JS.InvokeVoidAsync("game.init", _selfRef);
+    maxScore = await GetMaxScoreAsync();
+    await JS.InvokeVoidAsync("game.startLoop");
+  }
+
+  [JSInvokable]
+  public async Task OnKeyDown(string key)
+  {
+    switch (key)
+    {
+      case " ": // Space
+        if (state == GameState.Ready)
+        {
+          state = GameState.Running;
+          Jump();
+        }
+        else if (state == GameState.GameOver)
+        {
+          Reset();
+          state = GameState.Running;
+          Jump();
+        }
+        else if (state == GameState.Running)
+        {
+          Jump();
+        }
+        break;
+      case "r": case "R":
+        Reset();
+        state = GameState.Ready;
+        break;
+      case "p": case "P":
+        state = state == GameState.Running ? GameState.Ready : GameState.Running;
+        break;
+    }
+    await Task.CompletedTask;
+  }
+
+  [JSInvokable]
+  public async Task Tick(double dt)
+  {
+    if (state == GameState.Running)
+    {
+      Update((float)dt);
+    }
+    await JS.InvokeVoidAsync("game.draw", new
+    {
+      w = VirtualWidth,
+      h = VirtualHeight,
+      state = state.ToString(),
+      score,
+      maxScore,
+      px = playerX,
+      py = playerY,
+      pr = PlayerRadius,
+      pipes = pipes
+    });
+  }
+
+  private void Update(float dt)
+  {
+    playerVY += Gravity * dt;
+    playerY += playerVY * dt;
+
+    for (int i = pipes.Count - 1; i >= 0; i--)
+    {
+      var p = pipes[i];
+      p.X -= PipeSpeed * dt;
+      if (p.X + Pipe.Width < 0)
+      {
+        pipes.RemoveAt(i);
+        score++;
+        if (score > maxScore) { maxScore = score; _ = SetMaxScoreAsync(maxScore); }
+      }
+      else pipes[i] = p;
+    }
+
+    if (pipes.Count == 0 || (VirtualWidth - (pipes[^1].X + Pipe.Width)) >= PipeSpacing)
+    {
+      var gapY = Random.Shared.Next(160, (int)(VirtualHeight - 160));
+      pipes.Add(new Pipe(VirtualWidth, gapY));
+    }
+
+    if (playerY - PlayerRadius < 0 || playerY + PlayerRadius > VirtualHeight)
+    {
+      state = GameState.GameOver;
+      return;
+    }
+
+    foreach (var p in pipes)
+    {
+      bool withinX = playerX + PlayerRadius >= p.X && playerX - PlayerRadius <= p.X + Pipe.Width;
+      bool hitTop = playerY - PlayerRadius <= p.GapY - PipeGap / 2f;
+      bool hitBottom = playerY + PlayerRadius >= p.GapY + PipeGap / 2f;
+      if (withinX && (hitTop || hitBottom))
+      {
+        state = GameState.GameOver;
+        return;
+      }
+    }
+  }
+
+  private void Jump() => playerVY = JumpVelocity;
+
+  private void Reset()
+  {
+    playerY = VirtualHeight/2f;
+    playerVY = 0f;
+    pipes.Clear();
+    score = 0;
+  }
+
+  private async Task<int> GetMaxScoreAsync()
+  {
+    try
+    {
+      var s = await JS.InvokeAsync<string>("game.storeGet", "maxScore");
+      if (int.TryParse(s, out var v)) return v; else return 0;
+    }
+    catch { return 0; }
+  }
+  private async Task SetMaxScoreAsync(int value)
+  { try { await JS.InvokeVoidAsync("game.storeSet", "maxScore", value.ToString()); } catch { } }
+
+  private enum GameState { Ready, Running, GameOver }
+  private record struct Pipe(float X, float GapY)
+  {
+    public const float Width = 64f;
+    public float X = X;
+    public float GapY = GapY;
+  }
+}
+
+

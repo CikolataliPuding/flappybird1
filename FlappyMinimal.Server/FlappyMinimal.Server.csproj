@@ -6,8 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FlappyBird.Client\FlappyBird.Client.csproj" />
+    <ProjectReference Include="..\FlappyMinimal.Client\FlappyMinimal.Client.csproj" />
+    <ProjectReference Include="..\FlappyMinimal.Shared\FlappyMinimal.Shared.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
   </ItemGroup>
 </Project>
+
 

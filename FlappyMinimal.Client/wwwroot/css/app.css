@@ -1,0 +1,11 @@
+:root{color-scheme:light dark}
+html,body{height:100%;margin:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0e0f12;color:#e9eef5;display:flex;align-items:center;justify-content:center}
+.page{width:100%;max-width:520px;padding:12px}
+header,footer{opacity:.7;text-align:center}
+header h1{font-size:18px;margin:8px 0}
+main{margin:8px 0}
+canvas{width:100%;height:auto;display:block;border:1px solid #3b4252;border-radius:10px;background:linear-gradient(180deg,#1a1d24,#13151a)}
+a{color:#9ccaff}
+
+
