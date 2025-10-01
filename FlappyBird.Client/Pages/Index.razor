@@ -3,7 +3,7 @@
 <h1>Flappy Bird (C# - Blazor WASM)</h1>
 
 <div class="hud">
-  <div>Puan: @score</div>
+  <div>Puan: @score<span>@(highScore > 0 ? $" / En İyi: {highScore}" : string.Empty)</span></div>
   <div>
     <button class="btn" @onclick="Restart">Yeniden Başlat</button>
   </div>
@@ -39,14 +39,16 @@
 
   private bool isRunning = false;
   private int score = 0;
+  private int highScore = 0;
   private double lastTimestamp;
 
   private Bird bird = new(120f, 360f);
   private readonly List<Pipe> pipes = new();
 
-  protected override void OnInitialized()
+  protected override async Task OnInitializedAsync()
   {
     ResetGame();
+    highScore = await GetHighScoreAsync();
   }
 
   protected override void OnAfterRender(bool firstRender)
@@ -139,6 +141,11 @@
   private void GameOver()
   {
     isRunning = false;
+    if (score > highScore)
+    {
+      highScore = score;
+      _ = SetHighScoreAsync(highScore);
+    }
   }
 
   private void Restart()
@@ -189,6 +196,25 @@
   {
     public float X = X;
     public float GapY = GapY;
+  }
+
+  [Inject]
+  private IJSRuntime JS { get; set; } = default!;
+
+  private async Task<int> GetHighScoreAsync()
+  {
+    try
+    {
+      var value = await JS.InvokeAsync<string>("fb.get", "fb_highscore");
+      if (int.TryParse(value, out var v)) return v;
+      return 0;
+    }
+    catch { return 0; }
+  }
+
+  private async Task SetHighScoreAsync(int value)
+  {
+    try { await JS.InvokeVoidAsync("fb.set", "fb_highscore", value.ToString()); } catch { }
   }
 }
 
