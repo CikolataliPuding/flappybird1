@@ -4,7 +4,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+// Health endpoint
+app.MapGet("/health", () => Results.Ok("ok"));
 
 // Blazor WASM static dosyaları
 app.UseBlazorFrameworkFiles();
