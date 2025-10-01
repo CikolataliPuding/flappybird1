@@ -21,10 +21,12 @@ Varsayılan olarak `http://localhost:5000` veya `http://localhost:5173` adresler
 - Space / Mouse tıklama / Dokunma: Zıpla
 - Yeniden Başlat: Oyun biterse yeniden başlatır
 
-### Render Dağıtım
-1. Depoyu Render'a bağlayın.
-2. `render.yaml` dosyasını kullanarak Static Site olarak kurulum yapın.
-3. Build Command: `dotnet publish FlappyBird.Client/FlappyBird.Client.csproj -c Release -o build`
-4. Publish Directory: `build/wwwroot`
+### Render Dağıtım (Web Service, .NET 8)
+1. Render’da yeni bir “Web Service” oluşturun.
+2. Kaynak: Bu GitHub deposu.
+3. Ortam: Docker (render.yaml ve Dockerfile bu repoda mevcut).
+4. Plan: Free (veya ihtiyacınıza göre).
+5. Region: Oregon (varsayılan).
+6. `render.yaml` içindeki servisi otomatik algılar; özel komut gerekmez.
 
-Render, `wwwroot` içeriğini statik olarak sunacaktır. Blazor WebAssembly istemci tarafında çalışır.
+Konteyner 10000 portunu dinliyor ve ASP.NET Core uygulaması Blazor WASM static dosyalarını servis ediyor. İlk kurulum sonrası 1-2 dakika içinde uygulama yayında olur.

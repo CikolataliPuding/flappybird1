@@ -1,8 +1,10 @@
 services:
-  - type: static_site
+  - type: web
     name: flappybird-csharp
-    env: static
-    buildCommand: dotnet publish FlappyBird.Client/FlappyBird.Client.csproj -c Release -o build
-    publishPath: build/wwwroot
-    pullRequestPreviewsEnabled: true
+    env: docker
+    buildCommand: ""
+    startCommand: ""
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
 
