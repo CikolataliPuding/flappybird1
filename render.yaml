@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: flappy-minimal
+    runtime: dotnet
+    region: oregon
+    plan: free
+    buildCommand: dotnet publish FlappyMinimal.Server/FlappyMinimal.Server.csproj -c Release -o out
+    startCommand: dotnet out/FlappyMinimal.Server.dll --urls http://0.0.0.0:${PORT}
+    healthCheckPath: /health
+
