@@ -21,12 +21,13 @@ Varsayılan olarak `http://localhost:5000` veya `http://localhost:5173` adresler
 - Space / Mouse tıklama / Dokunma: Zıpla
 - Yeniden Başlat: Oyun biterse yeniden başlatır
 
-### Render Dağıtım (Web Service, .NET 8)
-1. Render’da yeni bir “Web Service” oluşturun.
+### Render Dağıtım (Web Service, .NET runtime)
+1. Render’da “Web Service” oluşturun.
 2. Kaynak: Bu GitHub deposu.
-3. Ortam: Docker (render.yaml ve Dockerfile bu repoda mevcut).
-4. Plan: Free (veya ihtiyacınıza göre).
-5. Region: Oregon (varsayılan).
-6. `render.yaml` içindeki servisi otomatik algılar; özel komut gerekmez.
+3. Runtime: .NET
+4. Region: Oregon (varsayılan), Plan: Free
+5. Build Command: `dotnet publish FlappyBird.Server/FlappyBird.Server.csproj -c Release -o out`
+6. Start Command: `dotnet out/FlappyBird.Server.dll`
+7. Environment > Add: `ASPNETCORE_URLS = http://0.0.0.0:${PORT}` (render.yaml bunu içerir)
 
-Konteyner 10000 portunu dinliyor ve ASP.NET Core uygulaması Blazor WASM static dosyalarını servis ediyor. İlk kurulum sonrası 1-2 dakika içinde uygulama yayında olur.
+Uygulama, ASP.NET Core ile Blazor WASM static dosyalarını sunar ve tüm yolları `index.html`’e yönlendirir.

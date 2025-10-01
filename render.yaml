@@ -1,10 +1,12 @@
 services:
   - type: web
     name: flappybird-csharp
-    env: docker
-    buildCommand: ""
-    startCommand: ""
+    runtime: dotnet
     plan: free
     region: oregon
-    dockerfilePath: Dockerfile
+    buildCommand: dotnet publish FlappyBird.Server/FlappyBird.Server.csproj -c Release -o out
+    startCommand: dotnet out/FlappyBird.Server.dll
+    envVars:
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:${PORT}
 
